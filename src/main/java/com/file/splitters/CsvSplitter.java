@@ -1,12 +1,16 @@
 package com.file.splitters;
 
 
+import com.file.dto.IndexTuple;
 import com.file.dto.SplitIndexDto;
 
 import java.io.*;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class CsvSplitter implements Splitter {
@@ -48,6 +52,18 @@ public class CsvSplitter implements Splitter {
         }
         writer.close();
 
+    }
+
+    @Override
+    public Map<Integer, IndexTuple> generateIndexMap(Path sourceFile, int size_buffer) {
+        List<Integer> indexesList = getSeekIndexes(sourceFile.toAbsolutePath(), size_buffer);
+        Map<Integer, IndexTuple> map = new HashMap<>();
+        for (int i = 0; i < indexesList.size() - 1; i++) {
+            int indexLeft = indexesList.get(i);
+            int indexRight = indexesList.get(i + 1) - 1;
+            map.put(i, new IndexTuple(indexLeft, indexRight, sourceFile));
+        }
+        return map;
     }
 
     public static List<Integer> getSeekIndexes(Path path, int size_buffer){
